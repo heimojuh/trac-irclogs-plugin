@@ -1,6 +1,6 @@
 from datetime import datetime
 from os import path
-from pytz import timezone, UTC
+from pytz import timezone, UTC, utc
 from time import strftime, strptime, gmtime, mktime, tzset
 import os
 import sys
@@ -59,19 +59,29 @@ if whoosh_loaded:
             #logview = web_ui.IrcLogsView(self.env)
             for result in self.search(terms):
                 dt_str = ''
+                d_str = ''
+                t_str = ''
                 if result.get('timestamp'):
-                    dt = chmgr.to_user_tz(req, result['timestamp'])
-                    d_str = "%04d/%02d/%02d"%(
-                        dt.year,
-                        dt.month,
-                        dt.day,
-                    )
-                    t_str = "%02d:%02d:%02d"%(
-                        dt.hour,
-                        dt.minute,
-                        dt.second
-                    )
-                channel = ''
+                    print "timestamp: "+result['timestamp']
+                    d_str = "%04s/%02s/%02s" % (result['timestamp'][0:4], result['timestamp'][4:6],result['timestamp'][6:8])
+                    print d_str
+                    t_str = "%02s:%02s:%02s" % (result['timestamp'][8:10], result['timestamp'][10:12],result['timestamp'][12:14])
+                    dt = datetime(int(result['timestamp'][0:4]), int(result['timestamp'][4:6]),int(result['timestamp'][6:8]),int(result['timestamp'][8:10]), int(result['timestamp'][10:12]),int(result['timestamp'][12:14]),tzinfo=utc)
+
+                    #t_str = time_tuple[3]+":"+time_tuple[4]+":"+time_tuple[5]
+
+                    #dt = chmgr.to_user_tz(req, result['timestamp'])
+                    #d_str = "%04d/%02d/%02d"%(
+                    #    dt.year,
+                    #    dt.month,
+                    #    dt.day,
+                    #)
+                    #t_str = "%02d:%02d:%02d"%(
+                    #    dt.hour,
+                    #    dt.minute,
+                    #    dt.second
+                    #)
+                #channel = ''
                 if result.get('channel'):
                     channel = '%s/'%result['channel']
 
@@ -81,11 +91,12 @@ if whoosh_loaded:
                     permcache[channel] = req.perm.has_permission(chobj.perm())
                 if permcache[channel]:
                     yield "%s#%s"%(req.href(url), t_str), \
-                        'irclogs for %s'%result['channel'], dt, \
-                        'irclog', result['content']
+                        'irclogs for %s'%result['channel'], dt ,'irclog', result['content']
         # End ISearchSource impl
 
         def update_index(self):
+            
+            print "updating index.."
             last_index_dt = UTC.localize(datetime(*gmtime(self.last_index)[:6]))
             now = UTC.localize(datetime.utcnow())
             idx = self.get_index()
@@ -93,6 +104,7 @@ if whoosh_loaded:
             try:
                 chmgr = IRCChannelManager(self.env)
                 for channel in chmgr.channels():
+                    print "channel "+channel.name()
                     for line in channel.events_in_range(last_index_dt, now):
                         if line['type'] == 'comment': 
                             content = "<%s> %s"%(line['nick'], 
@@ -103,6 +115,7 @@ if whoosh_loaded:
                                     self.TIMESTAMP_FORMAT),
                                 content=content
                             )
+                            print content
                         if line['type'] == 'action':
                             content = "* %s %s"%(line['nick'], line['action'])
                             writer.add_document(
@@ -139,6 +152,7 @@ if whoosh_loaded:
             return index.open_dir(ip)
 
         def search(self, terms):
+            self.update_index()
             chmgr = IRCChannelManager(self.env)
             ix = self.get_index()
             searcher = ix.searcher()
@@ -146,6 +160,6 @@ if whoosh_loaded:
             if terms:
                 for f in searcher.search(parsed_terms):
                     timestamp = strptime(f['timestamp'], self.TIMESTAMP_FORMAT)
-                    f['timestamp'] = \
-                            UTC.localize(datetime(*timestamp[:6]))
+                    #f['timestamp'] = \
+                    #        UTC.localize(datetime(*timestamp[:6]))
                     yield f

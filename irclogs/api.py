@@ -239,4 +239,5 @@ class IRCChannelManager(Component):
                     "parsed as UTC")
             tzname = 'UTC'
             utz = timezone(tzname)
-        return utz.normalize(datetime.astimezone(utz))
+        #return utz.normalize(datetime.astimezone(utz))
+        return utz
