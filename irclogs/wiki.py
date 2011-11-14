@@ -40,7 +40,7 @@ class IrcLogWiki(Component):
            ch_mgr = IRCChannelManager(self.env)
            t = strptime(m.group('datetime'), self.date_format)
            dt = UTC.localize(datetime(*t[:6]))
-           dt = ch_mgr.to_user_tz(formatter.req, dt)
+           #dt = ch_mgr.to_user_tz(formatter.req, dt)
            timestr = dt.strftime(self.time_format)
            return html.a(label, title=label, href=formatter.href.irclogs(
                      m.group('channel'), '%02d'%dt.year, '%02d'%dt.month, 

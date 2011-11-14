@@ -1,7 +1,7 @@
 import heapq
 import itertools
 import re
-from pytz import UnknownTimeZoneError, timezone
+from pytz import UnknownTimeZoneError, timezone, UTC
 
 from trac.core import *
 from trac.config import Option
@@ -10,7 +10,7 @@ class IIRCLogsProvider(Interface):
     """An interface for different sources of irc logs.  DB and file 
     implementations are provided."""
 
-    def get_events_in_range(self, channel_name, start, end):
+    def get_events_in_range(self, channel_name, start, end, user_tz=UTC):
         """Yeilds events, in order, within the range, enclusive.  Channel is 
         the channel name in config, and not the actual channel name.
 
@@ -120,7 +120,7 @@ class IRCChannel(object):
     def setting(self, name, default=None):
         return self.settings().get(name, default)
 
-    def events_in_range(self, start, end):
+    def events_in_range(self, start, end, user_tz=UTC):
         prov_name = self.provider()
         provider = self._chmgr.provider(prov_name)
         return provider.get_events_in_range(self, start, end)

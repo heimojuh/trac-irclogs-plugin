@@ -3,6 +3,7 @@ import os
 import re
 import calendar
 import pytz
+from pytz import UTC
 import time
 
 from time import strptime
@@ -96,10 +97,14 @@ class IrcLogsView(Component):
             l['nickcls'] = 'nick-%d' % (sum(ord(c) for c in l['nick']) % 8)
         return l
 
-    def _render_line(self, line):
+    def _render_line(self, line, tz):
         hidden = line['type'] in self.show_msg_types and ' ' or 'hidden'
+        
+        
+
         line.update({
             'time': line.get('timestamp') and line['timestamp'].time() or '',
+            'time_user': line.get('timestamp').astimezone(tz) and line['timestamp'].astimezone(tz).time() or '',
             'message': escape(line['message']),
             'comment': escape(line.get('comment')),
             'action': escape(line.get('action')),
@@ -108,17 +113,17 @@ class IrcLogsView(Component):
         if line['type'] == 'comment':
             return ('<tr class="%(type)s %(hidden)s"><td class="time">' + \
                    '[<a name="%(time)s" href="#%(time)s">%(time)s</a>]' + \
-                   '</td><td class="left %(nickcls)s">&lt;%(nick)s&gt;' + \
+                   '</td><td class="time">[%(time_user)s]</td><td class="left %(nickcls)s">&lt;%(nick)s&gt;' + \
                    '</td><td class="right">%(comment)s</td></tr>')%line 
         if line['type'] == 'action':
             return ('<tr class="%(type)s %(hidden)s"><td class="time">' + \
                    '[<a name="%(time)s" href="#%(time)s">%(time)s</a>]' + \
-                   '</td><td class="left">*</td><td class="right">' + \
+                   '</td><td class="time">[%(time_user)s]</td><td class="left">*</td><td class="right">' + \
                    '%(action)s</td></tr>')%line
         else: 
             return ('<tr class="%(type)s %(hidden)s"><td class="time">' + \
                    '[<a name="%(time)s" href="#%(time)s">%(time)s</a>]' + \
-                   '</td><td class="left"></td><td class=' + \
+                   '</td><td class="time">[%(time_user)s]</td><td class="left"></td><td class=' + \
                    '"right">%(message)s</td></tr>')%line
 
     def process_request(self, req):
@@ -158,7 +163,7 @@ class IrcLogsView(Component):
         req.perm.assert_permission(channel.perm())
         oneday = timedelta(days=1)
         reqtz = timezone(str(req.tz))
-        start = reqtz.localize(datetime(context['year'], context['month'], 
+        start = UTC.localize(datetime(context['year'], context['month'], 
             context['day'], 0, 0, 0))
         # cheezy hack to give us enough lines as long as the channel is 
         # somewhat active.  Without this we get a shortage of feed lines
@@ -180,8 +185,13 @@ class IrcLogsView(Component):
         if req.args.get('feed') == 'feed':
             limit = int(req.args.get('feed_count', 10))
             context['lines'] = list(context['lines'])[-limit:]
-            context['rows'] = imap(self._render_line, context['lines'])
+            user_tz = req.tz; 
+            context['rows'] = [self._render_line(x, user_tz) for x in context['lines']]
+            #context['rows'] = imap(self._render_line, context['lines'])
+            
             return 'irclogs_feed.html', context, None 
         else:
-            context['rows'] = imap(self._render_line, context['lines'])
+            user_tz = req.tz; 
+            context['rows'] = [self._render_line(x, user_tz) for x in context['lines']]
+            #context['rows'] = imap(self._render_line, context['lines'])
             return 'irclogs.html', context, None

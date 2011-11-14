@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import unittest
 from time import strptime
 from datetime import datetime
@@ -64,7 +63,7 @@ class ApiTestCase(unittest.TestCase):
         self.assertEqual('America/New_York', req.session.get('tz'))
         dt = UTC.localize(datetime.today())
         udt = self.out.to_user_tz(req, dt)
-        self.assertEqual('America/New_York', str(udt.tzinfo))
+        self.assertEqual('America/New_York', str(udt))
 
     def test_tz_conversion(self):
         NYC = timezone('America/New_York')

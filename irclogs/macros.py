@@ -65,14 +65,19 @@ class IrcLogQuoteMacro(WikiMacroBase):
         ch_mgr = IRCChannelManager(self.env)
         start = datetime(*strptime(utc_dt, self.date_format)[:6])
         start = UTC.localize(start)
-        start = ch_mgr.to_user_tz(formatter.req, start)
+        #start = ch_mgr.to_user_tz(formatter.req, start)
+        
+        
+        
         end = start + timedelta(seconds=offset)
         channel = ch_mgr.channel(channel_name)
         formatter.req.perm.assert_permission(channel.perm())
         lines = channel.events_in_range(start, end)
         lines = filter(lambda x: not x.get('hidden'), 
                 map(irclogs._map_lines, lines))
-        rows = map(irclogs._render_line, lines)
+        #rows = map(irclogs._render_line, lines)
+        user_tz = formatter.req.tz; 
+        rows = [irclogs._render_line(x, user_tz) for x in lines]
 
         add_stylesheet(formatter.req, 'irclogs/css/irclogs.css')
         data = Chrome(self.env).populate_data(
