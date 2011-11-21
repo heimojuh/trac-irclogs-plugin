@@ -139,7 +139,7 @@ if whoosh_loaded:
             except Exception, e:
                 writer.cancel()
                 idx.close()
-                raise e
+                
 
         def get_index(self):
             ip = self.indexpath
