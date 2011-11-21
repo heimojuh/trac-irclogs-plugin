@@ -3,7 +3,7 @@ import os
 import re
 import calendar
 import pytz
-from pytz import UTC
+from pytz import UTC, UnknownTimeZoneError
 import time
 
 from time import strptime
@@ -162,7 +162,14 @@ class IrcLogsView(Component):
         channel = ch_mgr.channel(context['channel'])
         req.perm.assert_permission(channel.perm())
         oneday = timedelta(days=1)
-        reqtz = timezone(str(req.tz))
+
+        # TODO: I think we should modify to_user_tz in API to do this properly
+        try:
+            reqtz = timezone(str(req.tz))
+        except UnknownTimeZoneError:
+            reqtz = timezone('UTC')
+
+        
         start = UTC.localize(datetime(context['year'], context['month'], 
             context['day'], 0, 0, 0))
         # cheezy hack to give us enough lines as long as the channel is 
