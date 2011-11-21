@@ -111,19 +111,19 @@ class IrcLogsView(Component):
             'hidden': hidden,
         })
         if line['type'] == 'comment':
-            return ('<tr class="%(type)s %(hidden)s"><td style="visibility:hidden;">' + \
-                   '<a name="%(time)s" href="#%(time)s"></a>' + \
-                   '</td><td class="time">[%(time_user)s]</td><td class="left %(nickcls)s">&lt;%(nick)s&gt;' + \
+            return ('<tr class="%(type)s %(hidden)s"><td class="time">' + \
+                   '[<a name="%(time)s" href="#%(time)s">%(time_user)s</a>]' + \
+                   '</td><td class="left %(nickcls)s">&lt;%(nick)s&gt;' + \
                    '</td><td class="right">%(comment)s</td></tr>')%line 
         if line['type'] == 'action':
-            return ('<tr class="%(type)s %(hidden)s"><td style="visibility:hidden;">' + \
-                   '<a name="%(time)s" href="#%(time)s"></a>' + \
-                   '</td><td class="time">[%(time_user)s]</td><td class="left">*</td><td class="right">' + \
+            return ('<tr class="%(type)s %(hidden)s"><td class="time">' + \
+                   '[<a name="%(time)s" href="#%(time)s">%(time_user)s</a>]' + \
+                   '</td><td class="left">*</td><td class="right">' + \
                    '%(action)s</td></tr>')%line
         else: 
-            return ('<tr class="%(type)s %(hidden)s"><td style="visibility:hidden;">' + \
-                   '<a name="%(time)s" href="#%(time)s"></a>' + \
-                   '</td><td class="time">[%(time_user)s]</td><td class="left"></td><td class=' + \
+            return ('<tr class="%(type)s %(hidden)s"><td class="time">' + \
+                   '[<a name="%(time)s" href="#%(time)s">%(time_user)s</a>]' + \
+                   '</td><td class="left"></td><td class=' + \
                    '"right">%(message)s</td></tr>')%line
 
     def process_request(self, req):
