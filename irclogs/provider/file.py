@@ -217,7 +217,7 @@ class FileIRCLogProvider(Component):
         """Channel is the config channel name.  start and end are datetimes
         in the users tz.  If the start and end times have different timezones,
         you're fucked."""
-        self.log.debug('retrieving %s logs.  start: %s, end: %s'%(channel.name(), start, end))
+        #self.log.debug('retrieving %s logs.  start: %s, end: %s'%(channel.name(), start, end))
         ch_mgr = IRCChannelManager(self.env)
         tzname = channel.setting('timezone', 'utc')
         try:
@@ -312,7 +312,7 @@ class FileIRCLogProvider(Component):
                     'channel_name': channel.channel()[1:],
                 })
                 filepaths.append(fileformat)
-                self.log.debug("parsing %s"%(fileformat))
+                #self.log.debug("parsing %s"%(fileformat))
             yield filepaths
 
     def parse_lines(self, lines, channel=None, target_tz=None):

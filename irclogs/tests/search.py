@@ -69,6 +69,7 @@ class SearchTestCase(unittest.TestCase):
         return environ
 
     def _test_index_and_search(self):
+        print "tests"
         self.out.update_index()
         req = Request(self._make_environ(), None)
         req.session = {'tz': 'UTC'}
@@ -112,9 +113,21 @@ class SearchTestCase(unittest.TestCase):
         results = [i for i in self.out.get_search_results(req, (u'hello',), ('irclogs',))]
         self.assertEqual(80, len(results))
 
+class ThreadTestCase(unittest.TestCase):
+
+    def setUp(self):
+
+        self.env = EnvironmentStub()
+    def test_thread_is(self):
+        self.updater = IrcUpdater(self.env)
+        time.sleep(40);
+
+
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(SearchTestCase, 'test'))
+    #suite.addTest(unittest.makeSuite(SearchTestCase, 'test'))
+    #suite.addTest(unittest.makeSuite(ThreadTestCase, 'test'))
+    print "suites"
     return suite
 
 if __name__ == '__main__':
