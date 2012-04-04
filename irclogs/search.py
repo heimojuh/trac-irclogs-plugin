@@ -42,8 +42,8 @@ if whoosh_loaded:
         SCHEMA = Schema(channel=STORED, timestamp=STORED, 
                 content=TEXT(stored=True))
         PARSER = QueryParser("content", schema=SCHEMA)
-        def __init__(self): 
-            self.log.debug("irc updated starting")
+        
+        def start(self):
             self.myThread = TimeThread(self.update_index, 30, self.log)
             self.myThread.setName("indexThread")
             self.myThread.start()
@@ -126,7 +126,6 @@ if whoosh_loaded:
                 self.log.info('XMailTimerThread: init done with sec: %s' % sec)
 
         def run(self):
-            while True:
                 try:
                     # error occured: 'ascii' codec can't encode character u'\xfc' in position 19: ordinal not in range(128)
                     self.func()
@@ -136,10 +135,6 @@ if whoosh_loaded:
                                 '[XMailTimerThread.run] -- Exception occured: %r' % e)
                         exc_traceback = sys.exc_info()[2]
                         self.log.error('TraceBack: %s' % exc_traceback )
-
-                if self.log:
-                    self.log.debug('sleeping %s secs' % self.sec)
-                time.sleep(self.sec)
 
     class WhooshIrcLogsIndex(Component):
         implements(ISearchSource)
@@ -228,7 +223,7 @@ if whoosh_loaded:
             return index.open_dir(ip)
 
         def search(self, terms):
-            #self.update_index()
+            self.updater.start()
             chmgr = IRCChannelManager(self.env)
             ix = self.get_index()
             self.log.debug(ix)

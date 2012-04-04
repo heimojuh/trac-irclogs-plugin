@@ -1,7 +1,7 @@
 from setuptools import setup
 
 PACKAGE = 'irclogs'
-VERSION = '0.3-heimojuh'
+VERSION = '0.3-heimojuh-th'
 
 setup(
     name=PACKAGE,
